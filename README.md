@@ -41,9 +41,9 @@ return [
 	// 错误信息返回格式
 	'error_format' => [
 		'message' => ':message',
-        'errors' => ':errors',
-        'code' => ':code',
-        'status_code' => ':status_code',
+		'errors' => ':errors',
+ 		'code' => ':code',
+		'status_code' => ':status_code',
 	],
 ];
 ```
