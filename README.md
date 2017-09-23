@@ -44,6 +44,7 @@ return [
 	'serializer' => 'DataArray',
 
 	// 开启接口调试模式，接口数据会带上debug字段，包含thinkphp的所有异常信息
+  	// 目前支持请求异常处理，其他异常还是会由thinkphp处理, 后续继续完善
 	'debug' => false,
 	
 	// 错误信息返回格式
