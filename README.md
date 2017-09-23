@@ -208,7 +208,7 @@ return $this->response->item($user)->setCacheControl($cache);
 
 #####DataArray 
 
-```json
+```txt
 // item
 {
   'data': [...],
@@ -230,7 +230,7 @@ return $this->response->item($user)->setCacheControl($cache);
 
 ##### Array
 
-```json
+```txt
 // item
 {
   'item_field1': '...',
