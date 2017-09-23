@@ -14,14 +14,14 @@
 
 ```txt
 "require": {
-    "zewail/think-api": "0.0.1-beta0.*"
+    "zewail/think-api": "0.0.*@beta"
 }
 ```
 
 或者你可以在命令行执行 `composer require` 命令
 
 ```bash
-composer require zewail/think-api:0.0.1-beta0.*
+composer require zewail/think-api:0.0.x@beta
 ```
 
 ## 配置
