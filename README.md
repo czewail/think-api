@@ -1,6 +1,14 @@
 # think-api
 帮助thinkphp 5 开发者快速、轻松的构建Api
 
+### 说明
+
+该包处于开发状态中，已列出的功能均可使用
+
+有什么建议或者反馈可以在[issue](https://github.com/czewail/thinp-api/issues)中提出
+
+另外，欢迎Start和Fork该项目😄😄😄😄😄
+
 ## 安装
 
 #### 环境要求
@@ -14,14 +22,14 @@
 
 ```txt
 "require": {
-    "zewail/think-api": "0.0.*@beta"
+    "zewail/think-api": "0.0.*@dev"
 }
 ```
 
 或者你可以在命令行执行 `composer require` 命令
 
 ```bash
-composer require zewail/think-api:0.0.x@beta
+composer require zewail/think-api:0.0.x@dev
 ```
 
 ## 配置
