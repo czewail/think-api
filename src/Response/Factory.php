@@ -147,7 +147,7 @@ class Factory
     	$Response = new Response($content);
     	$Response->setCode(201);
     	if (! is_null($location)) {
-            $Response->setHeader('Location', $location);
+            $Response->addHeader('Location', $location);
         }
         return $Response;
     }
