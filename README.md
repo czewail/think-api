@@ -206,7 +206,7 @@ return $this->response->item($user)->setCacheControl($cache);
 - `DataArray`
 - `Array`
 
-#####DataArray 
+##### DataArray
 
 ```txt
 // item
