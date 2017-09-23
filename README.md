@@ -87,21 +87,21 @@ return $this->response->array($user->toArray());
 
 ```php
 $user = User::get($id);
-return $this->response->item($user, ['id', 'name']);
+return $this->response->item($user);
 ```
 
 ##### 响应一个元素集合
 
 ```php
 $users = User::all();
-return $this->response->collection($users, ['id', 'name']);
+return $this->response->collection($users);
 ```
 
 ##### 分页响应
 
 ```php
 $users = User::paginate(10);
-return $this->response->paginator($users, ['id', 'name']);
+return $this->response->paginator($users);
 ```
 
 ##### 无内容响应
