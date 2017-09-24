@@ -4,8 +4,10 @@ namespace Zewail\Api\Routing;
 use think\Route;
 
 /**
-* 	
-*/
+ * @author   Chan Zewail <chanzewail@gmail.com>
+ * @license  https://opensource.org/licenses/MIT MIT
+ * @link     https://github.com/czewail/think-api
+ */
 class Router extends Route
 {
 	

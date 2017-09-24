@@ -6,6 +6,11 @@ use Zewail\Api\Serializers\DataArraySerializer;
 use Zewail\Api\Serializers\ArraySerializer;
 use think\Config;
 
+/**
+ * @author   Chan Zewail <chanzewail@gmail.com>
+ * @license  https://opensource.org/licenses/MIT MIT
+ * @link     https://github.com/czewail/think-api
+ */
 class Response extends JsonResponse
 {
     /**

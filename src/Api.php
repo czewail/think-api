@@ -2,26 +2,26 @@
 namespace Zewail\Api;
 
 use Zewail\Api\Response\Factory as ResponseFactory;
-use think\Config;
+use Zewail\Api\JWT\Factory as JWTFactory;
 
-
+/**
+ * @author   Chan Zewail <chanzewail@gmail.com>
+ * @license  https://opensource.org/licenses/MIT MIT
+ * @link     https://github.com/czewail/think-api
+ */
 trait Api
 {
 
 	protected $response;
+	protected $jwt;
 
 	function __construct()
 	{
-		$this->response();
+		$this->init();
 	}
 
-
-	/**
-	 * 获取 Response 对象
-	 * @return [type]
-	 */
-	
-	protected function response() {
+	protected function init() {
 		$this->response = new ResponseFactory;
+		$this->jwt = new JWTFactory;
 	}
 }

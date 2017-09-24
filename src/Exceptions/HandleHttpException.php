@@ -3,11 +3,18 @@ namespace Zewail\Api\Exceptions;
 
 use think\exception\Handle;
 use Zewail\Api\Http\Response;
+use Zewail\Api\Exceptions\JWTException;
 use think\exception\HttpException;
+use think\exception\ValidateException;
 use think\Config;
 use think\App;
 use Exception;
 
+/**
+ * @author   Chan Zewail <chanzewail@gmail.com>
+ * @license  https://opensource.org/licenses/MIT MIT
+ * @link     https://github.com/czewail/think-api
+ */
 class handleHttpException extends Handle
 {
 	// 默认错误信息格式
@@ -86,24 +93,24 @@ class handleHttpException extends Handle
 	 */
     public function render(Exception $e) 
     {
-        // 请求异常
-        if ($e instanceof HttpException) {
-        	// 将错误格式中的变量标识替换为内容
-        	$response = array_map(function($item) use ($e) {
-        		$item = str_replace(':message', $e->getMessage(), $item);
-        		$item = str_replace(':errors', '', $item);
-        		$item = str_replace(':code', $e->getStatusCode(), $item);
-        		$item = str_replace(':status_code', $e->getStatusCode(), $item);
-        		return $item;
-        	}, $this->error_format);
+        // JWT异常 或 Http异常
+        if ($e instanceof JWTException || $e instanceof HttpException) {
+            // 将错误格式中的变量标识替换为内容
+            $response = array_map(function($item) use ($e) {
+                $item = str_replace(':message', $e->getMessage(), $item);
+                $item = str_replace(':errors', '' , $item);
+                $item = str_replace(':code', $e->getCode(), $item);
+                $item = str_replace(':status_code', $e->getCode(), $item);
+                return $item;
+            }, $this->error_format);
 
-        	// debug 信息
-        	if ($this->debug) {
-        		$debug = $this->debugInfomation($e);
-		        // 返回中加入debug信息
-		        return (new Response($response, $e->getStatusCode()))->add('debug', $debug);
-        	}
-        	return (new Response($response, $e->getStatusCode()));
+            // debug 信息
+            if ($this->debug) {
+                $debug = $this->debugInfomation($e);
+                // 返回中加入debug信息
+                return (new Response($response, $e->getCode()))->add('debug', $debug);
+            }
+            return (new Response($response, $e->getCode()));
         }
 
         // 其他错误交给系统处理
