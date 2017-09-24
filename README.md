@@ -22,10 +22,13 @@
 - [数据过滤](#数据过滤)
   - [集中管理](#集中管理)
 - [JWT](#JWT)
-  - [签发 Token](#签发 Token)
-  - [验证 Token](#验证 Token)
+  - [签发 Token](#签发Token)
+  - [验证 Token](#验证Token)
   - [加密算法](#加密算法)
-  - ​
+
+
+
+
 
 ## 开始
 
@@ -342,7 +345,7 @@ return $this->response->item($user, 'user.mobile');
 
 ### JWT
 
-#### 签发 Token
+#### 签发Token
 
 ```php
 // ...
@@ -363,7 +366,7 @@ $token = $this->jwt->encode($payload);
 return $this->response->(['token' => $token]);
 ```
 
-#### 验证 Token
+#### 验证Token
 
 ```php
 // 从客户端传递过来的token
