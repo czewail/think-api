@@ -379,10 +379,10 @@ $payload = $this->jwt->decode($token);
 - `HS512`: `HMAC 使用 SHA-512 算法加密`
 - `RS256`: `RSASSA 使用 SHA-256 算法加密 `
 
-### 预计开发功能
 
-- 响应生成器(已完成)
-- 数据过滤管理(已完成)
-- 路由功能(未完成)
-- ...
 
+### 授权协议
+
+license: [MIT 授权协议](LICENSE)
+author: [陈泽韦](http://www.zewail.me/)
+email: [chanzewail@gmail.com](mailto:chanzewail@gmail.com)
