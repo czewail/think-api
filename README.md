@@ -384,5 +384,7 @@ $payload = $this->jwt->decode($token);
 ### 授权协议
 
 license: [MIT 授权协议](LICENSE)
+
 author: [陈泽韦](http://www.zewail.me/)
+
 email: [chanzewail@gmail.com](mailto:chanzewail@gmail.com)
