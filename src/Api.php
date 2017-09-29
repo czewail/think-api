@@ -3,6 +3,7 @@ namespace Zewail\Api;
 
 use Zewail\Api\Response\Factory as ResponseFactory;
 use Zewail\Api\JWT\Factory as JWTFactory;
+use think\Config;
 
 /**
  * @author   Chan Zewail <chanzewail@gmail.com>

@@ -11,11 +11,11 @@
 
 ### 功能
 
-- 响应生成器可以快速生成格式化、定制化的接口数据
-- 过滤器可以使接口数据集中管理
-- 转换器规范数据格式，并提供多种数据格式
-- JWT支持，接口授权简单方便
-- 正在增加其它功能..........
+- API版本管理
+- 响应生成器
+- 数据过滤
+- 数据格式转换
+- JWT支持
 
 
 
@@ -32,24 +32,27 @@
 
 ```txt
 "require": {
-    "zewail/think-api": "0.1.*@dev"
+    "zewail/think-api": "0.2.*@dev"
 }
 ```
 
 或者你可以在命令行执行 `composer require` 命令
 
 ```bash
-composer require zewail/think-api:0.1.x@dev
+composer require zewail/think-api:0.2.x@dev
 ```
 
 ## 配置
 
-`think-api` 提供了两个配置文件`api.php`和`resources.php`
+`think-api` 提供了两个配置文件`api.php`和`resources.php`， 配置文件可以在`vendor/zewail/think-api/config`目录下找到，也可以手动创建它们
 
 `api.php`用于常用配置项, 默认配置如下:
 
 ```php
 return [
+  	// api 默认版本号
+	'api_version' => 'v1',
+  
 	// 可选 DataArray, Array
 	'serializer' => 'DataArray',
 
@@ -67,9 +70,6 @@ return [
 	/*****************************/
 	/*--------JWT 配置------------*/
 	/*****************************/
-	// 是否开启jwt功能
-	'jwt' => true,
-
 	// jwt 加密算法
 	// 可选 HS256 HS512 RS256
 	'jwt_algorithm' => 'HS256',
@@ -91,9 +91,69 @@ return [
 ];
 ```
 
-在全局配置目录或者模块配置目录（取决于你需要将该功能用于全局还是该模块）新建`api.php`并将以上内容复制进去
+配置文件定义在全局配置目录或者模块配置目录（取决于你需要将该功能用于全局还是该模块）
 
 `resources.php`用于数据过滤集中管理,见[数据过滤集中管理](#集中管理)
+
+
+
+### 版本
+
+#### 版本组
+
+`think-api`在tp5的路由的基础上，封装了版本管理方法，要创建版本，我们需要获得一个 API 路由的实例
+
+```php
+$api = new \Zewail\Api\Routing\Router;
+```
+
+然后定义一个版本分组。允许我们为多个版本创建相同的路由。
+
+```php
+$api->version('v1', function ($api) {
+	// TODO
+});
+```
+
+如果你想一个分组返回多个版本，只需要传递一个版本数组
+
+```php
+$api->version(['v1', 'v2'], function ($api) {
+	// TODO
+});
+```
+
+#### 创建路由
+
+由于该实例是在tp5的基础路由上封装的，可以使用tp的路由方法创建
+
+```php
+$api->version('v1', function ($api) {
+	$api::rule('new/:id','index/News/read');
+});
+```
+
+因为端点被每个版本分组了，你可以为相同 URL 上的同一个端点创建不同响应
+
+```php
+$api->version('v1', function ($api) {
+    $api::rule('new/:id','index/V1/News/read');
+});
+
+$api->version('v2', function ($api) {
+    $api::rule('new/:id','index/V2/News/read');
+});
+```
+
+#### 访问特定路由版本
+
+默认访问配置文件中的默认版本
+
+但是，我们可以在Http的头信息中附带`api-version`参数，或者直接在在url或body中附带来访问指定版本
+
+```php
+http://example.com/new/2?api-version=v2
+```
 
 ## 响应
 
@@ -330,7 +390,6 @@ return $this->response->item($user, 'user.mobile');
 ```
 
 现在，哪些接口返回了哪些数据，在该配置文件中一目了然
-
 
 ### JWT
 

@@ -18,20 +18,20 @@ class Response extends JsonResponse
      * 
      * @var array
      */
-    protected $meta = [];
+    private $meta = [];
 
     /**
      * 其他附加信息集合
      * 
      * @var array
      */
-    protected $adds = [];
+    private $adds = [];
 
     /**
      * 可用格式数组
      * @var array
      */
-    protected $serializers = [
+    private $serializers = [
         'DataArray' => DataArraySerializer::class,
         'Array' => ArraySerializer::class,
     ];
@@ -40,7 +40,7 @@ class Response extends JsonResponse
      * 默认格式
      * @var League\Fractal\Serializer\ArraySerializer::class
      */
-    protected $serializer = DataArraySerializer::class;
+    private $serializer = DataArraySerializer::class;
 
 	/**
 	 * [__construct]
