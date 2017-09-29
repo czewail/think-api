@@ -133,7 +133,7 @@ $api->version('v1', function ($api) {
 });
 ```
 
-因为端点被每个版本分组了，你可以为相同 URL 上的同一个端点创建不同响应
+因为端点被每个版本分组了，你可以为相同 URL 上的同一个路由创建不同响应
 
 ```php
 $api->version('v1', function ($api) {
