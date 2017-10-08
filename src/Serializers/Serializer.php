@@ -38,7 +38,7 @@ class Serializer
 		return $this;
 	}
 
-	public function getData()
+	public function get()
 	{
 		return $this->data;
 	}

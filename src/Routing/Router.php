@@ -1,9 +1,8 @@
 <?php
 namespace Zewail\Api\Routing;
 
-use think\Route;
-use think\Config;
-use think\Request;
+use Config;
+use Request;
 use Closure;
 
 /**
@@ -11,10 +10,27 @@ use Closure;
  * @license  https://opensource.org/licenses/MIT MIT
  * @link     https://github.com/czewail/think-api
  */
-class Router extends Route
+class Router
 {
 	// 路由版本列表
 	private static $versions = [];
+
+	protected $config = [];
+
+
+	public function __construct()
+	{
+		// 读取默认配置文件
+		$configPath = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'api.php';
+		$config = require($configPath);
+		// 合并配置
+		$_config = Config::pull('api');
+		if ($_config && is_array($_config)) {
+			$this->config = array_merge($config, $_config);
+		} else {
+			$this->config = $config;
+		}
+	}
 
 	/**
 	 * 创建版本
@@ -32,17 +48,17 @@ class Router extends Route
         }
         array_unique(self::$versions);
 
-		$_version = Request::instance()->header('api-version') ?: Request::instance()->param('api-version');
+		$_version = Request::header('Api-Version') ?: Request::param('version');
 
 		if (!empty($_version)) {
 			if (in_array($_version, self::$versions) ) {
-        		call_user_func_array($routes, [$this]);
+        		call_user_func_array($routes, []);
         	}
 		} else {
-	        if (Config::has('api.api_version')) {
-	        	$default_version = Config::get('api.api_version');
+	        if ($this->config['version']) {
+	        	$default_version = $this->config['version'];
 	        	if (in_array($default_version, self::$versions) ) {
-	        		call_user_func_array($routes, [$this]);
+	        		call_user_func_array($routes, []);
 	        	}
 	        }
 		}

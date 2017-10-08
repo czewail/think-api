@@ -4,7 +4,7 @@ namespace Zewail\Api\Http;
 use think\response\Json as JsonResponse;
 use Zewail\Api\Serializers\DataArraySerializer;
 use Zewail\Api\Serializers\ArraySerializer;
-use think\Config;
+use Config;
 
 /**
  * @author   Chan Zewail <chanzewail@gmail.com>
@@ -42,6 +42,12 @@ class Response extends JsonResponse
      */
     private $serializer = DataArraySerializer::class;
 
+    /**
+     * 配置
+     * @var array
+     */
+    private $config = [];
+
 	/**
 	 * [__construct]
 	 * 
@@ -49,22 +55,23 @@ class Response extends JsonResponse
 	 * @param integer $code   
 	 * @param array   $header 
 	 */
-    function __construct($content = '', $code = 200, array $header = [])
+    public function __construct($content = '', $code = 200, array $header = [])
     {
-        $this->loadConfig();
-        parent::__construct($content, $code, $header);
-    }
+        // 读取默认配置文件
+        $configPath = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'api.php';
+        $config = require($configPath);
 
-    /**
-     * 读取配置
-     * @return [type] [description]
-     */
-    public function loadConfig()
-    {
-        if (Config::has('api')) {
-            $config = Config::get('api');
-            $this->serializer = in_array($config['serializer'], array_keys($this->serializers)) ? $this->serializers[$config['serializer']] : $this->serializers['DataArray'];
+        // 读取tp配置文件
+        $_config = Config::pull('api');
+
+        if ($config && is_array($config)) {
+            $this->config = array_merge($config, $_config);
+            $this->serializer = isset($this->serializers[$this->config['serializer']]) ? $this->serializers[$this->config['serializer']] : $this->serializers['DataArray'];
+        } else {
+            $this->config = $config;
         }
+
+        parent::__construct($content, $code, $header);
     }
 
     /**
@@ -76,10 +83,14 @@ class Response extends JsonResponse
     protected function output($data)
     {
         $serializer = new $this->serializer($data, $this->meta, $this->adds);
-
-        return parent::output($serializer->getData());
+        return parent::output($serializer->get());
     }
 
+    /**
+     * 添加自定义数据
+     * @param [type] $label [description]
+     * @param string $value [description]
+     */
     public function add($label, $value = '')
     {
         $this->adds[$label] = $value;
@@ -136,7 +147,7 @@ class Response extends JsonResponse
      */
     public function setLastModified($time)
     {
-    	return $this->setLastModified($time);
+    	return $this->lastModified($time);
     }
 
     /**

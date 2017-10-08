@@ -1,5 +1,5 @@
 <?php
-namespace Zewail\Api\JWT;
+namespace Zewail\Api\JWT\Library;
 
 /**
  * @author   Chan Zewail <chanzewail@gmail.com>

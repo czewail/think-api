@@ -3,8 +3,9 @@ namespace Zewail\Api\Response;
 
 use Zewail\Api\Http\Response;
 use Zewail\Api\Exceptions\TypeErrorException;
+use Zewail\Api\Exceptions\ResponseException;
 use think\exception\HttpException;
-use think\Config;
+use Config;
 use think\Model;
 use think\model\Collection as ModelCollection;
 
@@ -13,20 +14,14 @@ class Factory
 
 	protected $resources;
 
-	function __construct()
+	public function __construct()
 	{
-		$this->loadConfig();
-	}
-
-	/**
-	 * 读取配置文件
-	 */
-	protected function loadConfig()
-	{
-		if (Config::has('resources')) {
-            $this->resources = Config::get('resources');
+		$config = Config::pull('resources');
+        if ($config && is_array($config)) {
+            $this->resources = $config;
         }
 	}
+
 
 	/**
      * 过滤单个模型
@@ -37,7 +32,7 @@ class Factory
    	protected function filterItem($item, $filter = null)
    	{
    		if (is_array($filter)) {
-			return array_intersect_key($item->toArray(), $filter);
+			return array_intersect_key($item->toArray(), array_flip($filter));
 		} else if(is_string($filter)) {
 			if (is_array($this->resources) && !empty($this->resources[$filter]) && array_key_exists($filter, $this->resources)) {
 	        	return array_intersect_key($item->toArray(), array_flip($this->resources[$filter]));
@@ -160,8 +155,8 @@ class Factory
     public function noContent()
     {
         $Response = new Response(null);
-
-        return $Response->setCode(204);
+        $Response->setCode(204);
+        return $Response;
     }
 
     /**
@@ -176,8 +171,7 @@ class Factory
      */
     public function error($message, $statusCode)
     {
-        // throw new HandleException($message, $statusCode);
-        throw new HttpException($statusCode, $message);
+        throw new ResponseException($statusCode, $message);
     }
 
     /**

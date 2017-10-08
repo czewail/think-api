@@ -21,9 +21,20 @@ class DataArraySerializer extends Serializer
 		$this->setContent();
 		parent::__construct($meta, $adds);
 	}
-
+	/**
+	 * 将接口数据赋值给key
+	 */
 	protected function setContent()
 	{
 		$this->data[$this->key] = $this->content;
+	}
+
+	/**
+	 * 修改key
+	 * @param [type] $key [description]
+	 */
+	public function setKey($key)
+	{
+		$this->key = $key;
 	}
 }
