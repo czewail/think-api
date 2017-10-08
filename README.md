@@ -1,11 +1,13 @@
 
-[![Packagist](https://img.shields.io/packagist/dm/doctrine/orm.svg)](https://packagist.org/packages/zewail/think-api)
-[![Packagist Pre Release](https://img.shields.io/packagist/vpre/symfony/symfony.svg)](https://packagist.org/packages/zewail/think-api)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/czewail/thinp-api/blob/master/LICENSE)
+[![Packagist Pre Release](https://img.shields.io/badge/packagist-v1.0.0--beta1-orange.svg)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/czewail/thinp-api/master/LICENSE)
 
 thinp-api 是给开发者提供的一套针对thinkphp的API扩展工具，帮助开发者方便快捷的建造自己的API应用。
 
+**该包是针对thinkphp5.1以上版本**
+
 ### 功能
+
 这个包提供了以下等工具：
 - API版本管理
 - 响应生成器
