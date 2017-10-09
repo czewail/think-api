@@ -48,13 +48,13 @@ class Response extends JsonResponse
      */
     private $config = [];
 
-	/**
-	 * [__construct]
-	 * 
-	 * @param string  $content
-	 * @param integer $code   
-	 * @param array   $header 
-	 */
+    /**
+     * [__construct]
+     * 
+     * @param string  $content
+     * @param integer $code   
+     * @param array   $header 
+     */
     public function __construct($content = '', $code = 200, array $header = [])
     {
         // 读取默认配置文件
@@ -127,7 +127,7 @@ class Response extends JsonResponse
      * @param [mixed] $value
      */
     public function addHeader($name, $value = null) {
-    	return $this->header($name, $value);
+        return $this->header($name, $value);
     }
 
     /**
@@ -137,7 +137,7 @@ class Response extends JsonResponse
      */
     public function setCode($code)
     {
-    	return $this->code($code);
+        return $this->code($code);
     }
 
     /**
@@ -147,7 +147,7 @@ class Response extends JsonResponse
      */
     public function setLastModified($time)
     {
-    	return $this->lastModified($time);
+        return $this->lastModified($time);
     }
 
     /**
@@ -157,7 +157,7 @@ class Response extends JsonResponse
      */
     public function setETag($eTag)
     {
-    	return $this->eTag($eTag);
+        return $this->eTag($eTag);
     }
 
     /**
@@ -167,7 +167,7 @@ class Response extends JsonResponse
      */
     public function setExpires($time)
     {
-    	return $this->expires($time);
+        return $this->expires($time);
     }
 
     /**

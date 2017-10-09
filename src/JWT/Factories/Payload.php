@@ -14,11 +14,11 @@ use DateInterval;
 
 class Payload
 {
-	protected $request;
+    protected $request;
 
-	protected $ttl = 120;
+    protected $ttl = 120;
 
-	private $classMap = [
+    private $classMap = [
         'aud' => Audience::class,
         'exp' => Expiration::class,
         'iat' => IssuedAt::class,
@@ -27,14 +27,14 @@ class Payload
         'nbf' => NotBefore::class,
         'sub' => Subject::class,
     ];
-	
-	public function __construct($config)
-	{
+
+    public function __construct($config)
+    {
         if (isset($config['ttl']) && $config['ttl'] >= 0) {
             $this->setTTL($config['ttl']);
         }
-		$this->request = Request::instance();
-	}
+        $this->request = Request::instance();
+    }
 
     /**
      * 是否存在
@@ -58,12 +58,12 @@ class Payload
         }
     }
 
-	/**
-	 * Issuer
-	 * 
-	 * @return url
-	 */
-	public function iss()
+    /**
+     * Issuer
+     * 
+     * @return url
+     */
+    public function iss()
     {
         return $this->request->domain() . $this->request->baseUrl();
     }
@@ -75,7 +75,7 @@ class Payload
      */
     public function iat()
     {
-    	$datetime = new DateTime;
+        $datetime = new DateTime;
         // return $datetime->format('Y-m-d H:i:s');
         return $datetime->getTimestamp();
     }
@@ -87,10 +87,9 @@ class Payload
      */
     public function exp()
     {
-    	$datetime = new DateTime;
-    	$datetime->add(new DateInterval('PT' . $this->ttl . 'M'));
-        // return $datetime->format('Y-m-d H:i:s');
-    	return $datetime->getTimestamp();
+        $datetime = new DateTime;
+        $datetime->add(new DateInterval('PT' . $this->ttl . 'M'));
+        return $datetime->getTimestamp();
     }
 
     /**
@@ -100,8 +99,7 @@ class Payload
      */
     public function nbf()
     {
-    	$datetime = new DateTime;
-        // return $datetime->format('Y-m-d H:i:s');
+        $datetime = new DateTime;
         return $datetime->getTimestamp();
     }
 
@@ -112,7 +110,7 @@ class Payload
      */
     public function jti()
     {
-    	$length = 16;
+        $length = 16;
         $string = '';
         while (($len = strlen($string)) < $length) {
             $size = $length - $len;

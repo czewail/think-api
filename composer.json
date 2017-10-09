@@ -9,7 +9,8 @@
         }
     ],
     "require": {
-    	"php": ">=5.5.9"
+    	"php": ">=5.5.9",
+        "zewail/think-api": "1.0.x@beta"
     },
     "autoload": {
         "psr-4": {

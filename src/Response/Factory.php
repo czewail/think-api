@@ -9,49 +9,54 @@ use Config;
 use think\Model;
 use think\model\Collection as ModelCollection;
 
+
+/**
+ * @author   Chan Zewail <chanzewail@gmail.com>
+ * @license  https://opensource.org/licenses/MIT MIT
+ * @link     https://github.com/czewail/think-api
+ */
 class Factory
 {
 
-	protected $resources;
+    protected $resources;
 
-	public function __construct()
-	{
-		$config = Config::pull('resources');
+    public function __construct()
+    {
+        $config = Config::pull('resources');
         if ($config && is_array($config)) {
             $this->resources = $config;
         }
-	}
+    }
 
 
-	/**
+    /**
      * 过滤单个模型
      * @param  [type] $item   [description]
      * @param  [type] $filter [description]
      * @return [type]         [description]
      */
-   	protected function filterItem($item, $filter = null)
-   	{
-   		if (is_array($filter)) {
-			return array_intersect_key($item->toArray(), array_flip($filter));
-		} else if(is_string($filter)) {
-			if (is_array($this->resources) && !empty($this->resources[$filter]) && array_key_exists($filter, $this->resources)) {
-	        	return array_intersect_key($item->toArray(), array_flip($this->resources[$filter]));
-        	}
-		}
-		return $item;
+    protected function filterItem($item, $filter = null)
+    {
+        if (is_array($filter)) {
+            return array_intersect_key($item->toArray(), array_flip($filter));
+        } else if(is_string($filter)) {
+            if (is_array($this->resources) && !empty($this->resources[$filter]) && array_key_exists($filter, $this->resources)) {
+                return array_intersect_key($item->toArray(), array_flip($this->resources[$filter]));
+            }
+        }
+        return $item;
    	}
-	
 
-	/**
-	 * 数组的响应
-	 *
-	 * @param  array
-	 * @return Zewail\Api\Http\Response
-	 */
-	public function array($content = null)
-	{
-		return new Response($content);
-	}
+    /**
+     * 数组的响应
+     *
+     * @param  array
+     * @return Zewail\Api\Http\Response
+     */
+    public function array($content = null)
+    {
+        return new Response($content);
+    }
 
 
     /**
@@ -61,15 +66,14 @@ class Factory
      * @param  $filter
      * @return Zewail\Api\Http\Response    
      */
-	public function item($item, $filter = null)
+    public function item($item, $filter = null)
     {
-    	// 判断是否是Model实例
-    	if ($item instanceof Model) {
-    		$response = $this->filterItem($item, $filter);
-    	} else {
-    		throw new TypeErrorException("this is not a Model instance", 1);
-    	}
-        
+        // 判断是否是Model实例
+        if ($item instanceof Model) {
+            $response = $this->filterItem($item, $filter);
+        } else {
+            throw new TypeErrorException("this is not a Model instance", 1);
+        }
         return new Response($response);
     }
 
@@ -82,16 +86,16 @@ class Factory
     public function collection($collection, $filter = null)
     {
         if (is_array($collection)) {
-        	$response = array_map(function($item) use ($filter) {
-        		return $this->filterItem($item, $filter);
-        	}, $collection);
-        	return new Response($response);
+            $response = array_map(function($item) use ($filter) {
+                return $this->filterItem($item, $filter);
+            }, $collection);
+            return new Response($response);
         } else if ($collection instanceof ModelCollection) {
-        	$response = [];
-        	$collection->each(function($item) use ($filter, &$response) {
-        		$response[] = $this->filterItem($item, $filter);
-        	});
-        	return new Response($response);
+            $response = [];
+            $collection->each(function($item) use ($filter, &$response) {
+                $response[] = $this->filterItem($item, $filter);
+            });
+            return new Response($response);
         }
         return new Response($collection);
     }
@@ -105,43 +109,43 @@ class Factory
      */
     public function paginator($collection, $filter = null)
     {
-    	if (is_array($collection->items())) {
-    		$response = array_map(function($item) use ($filter) {
-        		return $this->filterItem($item, $filter);
-        	}, $collection->items());
+        if (is_array($collection->items())) {
+            $response = array_map(function($item) use ($filter) {
+                return $this->filterItem($item, $filter);
+            }, $collection->items());
 
-    		try {
-            	$total = $collection->total();
-            	$last_page = $collection->lastPage();
-	        } catch (\DomainException $e) {
-	            $total = null;
-	            $last_page = null;
-	        }
+            try {
+                $total = $collection->total();
+                $last_page = $collection->lastPage();
+            } catch (\DomainException $e) {
+                $total = null;
+                $last_page = null;
+            }
 
-	        $meta['paginator'] = [
-	        	'total' => $total,
-	        	'per_page' => $collection->listRows(),
-	        	'current_page' => $collection->currentPage(),
-	        	'last_page' => $last_page
-	        ];
+            $meta['paginator'] = [
+                'total' => $total,
+                'per_page' => $collection->listRows(),
+                'current_page' => $collection->currentPage(),
+                'last_page' => $last_page
+            ];
 
-        	return (new Response($response))->setMeta($meta);
-    	}
-    	return new Response($collection);
+            return (new Response($response))->setMeta($meta);
+        }
+        return new Response($collection);
     }
 
-	/**
-	 * 创建了资源的响应
-	 *
-	 * @param  资源响应位置
-	 * @param  资源响应内容
-	 * @return think\Response
-	 */
-	public function created($location = null, $content = null)
+    /**
+     * 创建了资源的响应
+     *
+     * @param  资源响应位置
+     * @param  资源响应内容
+     * @return think\Response
+     */
+    public function created($location = null, $content = null)
     {
-    	$Response = new Response($content);
-    	$Response->setCode(201);
-    	if (! is_null($location)) {
+        $Response = new Response($content);
+        $Response->setCode(201);
+        if (! is_null($location)) {
             $Response->addHeader('Location', $location);
         }
         return $Response;

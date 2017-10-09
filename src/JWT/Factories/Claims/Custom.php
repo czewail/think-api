@@ -8,11 +8,11 @@ namespace Zewail\Api\JWT\Factories\Claims;
  */
 class Custom extends Claim
 {
-	protected $name;
+    protected $name;
 
-	public function __construct($name, $value)
-	{
-		$this->name = $name;
-		parent::__construct($value);
-	}
+    public function __construct($name, $value)
+    {
+        $this->name = $name;
+        parent::__construct($value);
+    }
 }

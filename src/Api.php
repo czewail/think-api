@@ -13,16 +13,16 @@ use think\Config;
 trait Api
 {
 
-	protected $response;
-	protected $jwt;
+    protected $response;
+    protected $jwt;
 
-	function __construct()
-	{
-		$this->init();
-	}
+    function __construct()
+    {
+        $this->init();
+    }
 
-	protected function init() {
-		$this->response = new ResponseFactory;
-		$this->jwt = new JWTFactory;
-	}
+    protected function init() {
+        $this->response = new ResponseFactory;
+        $this->jwt = new JWTFactory;
+    }
 }

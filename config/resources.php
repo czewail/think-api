@@ -1,4 +1,4 @@
 <?php 
 return [
-	// 'user.onlyname' => ['id', 'name']
+    // 'user.onlyname' => ['id', 'name']
 ];
