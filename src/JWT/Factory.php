@@ -6,6 +6,7 @@ use Request;
 use think\Model;
 use Zewail\Api\Exceptions\JWTException;
 use Zewail\Api\Exceptions\UnauthenticateException;
+use Zewail\Api\Setting\Set;
 use Zewail\Api\JWT\Factories\Code;
 use Zewail\Api\JWT\Factories\Payload as PayloadFactory;
 use Zewail\Api\JWT\Factories\Claims\Collection;
@@ -37,18 +38,10 @@ class Factory
 
     function __construct()
     {
-        // 读取默认配置文件
-        $configPath = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'jwt.php';
-        $config = require($configPath);
-        // 合并配置
-        $_config = Config::pull('jwt');
-        if ($_config && is_array($_config)) {
-            $this->config = array_merge($config, $_config);
-        } else {
+        Set::jwt(function($config) {
             $this->config = $config;
-        }
-
-        $this->PayloadFactory = new PayloadFactory($config);
+        });
+        $this->PayloadFactory = new PayloadFactory($this->config);
         $this->claims = new Collection;
     }
 

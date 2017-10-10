@@ -2,9 +2,11 @@
 namespace Zewail\Api\Response;
 
 use Zewail\Api\Http\Response;
+use Zewail\Api\Setting\Set;
 use Zewail\Api\Exceptions\TypeErrorException;
 use Zewail\Api\Exceptions\ResponseException;
 use think\exception\HttpException;
+
 use Config;
 use think\Model;
 use think\model\Collection as ModelCollection;
@@ -18,14 +20,13 @@ use think\model\Collection as ModelCollection;
 class Factory
 {
 
-    protected $resources;
+    protected $resources = [];
 
     public function __construct()
     {
-        $config = Config::pull('resources');
-        if ($config && is_array($config)) {
+        Set::resources(function($config) {
             $this->resources = $config;
-        }
+        });
     }
 
 

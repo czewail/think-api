@@ -3,6 +3,7 @@ namespace Zewail\Api\JWT\Factories;
 
 use Zewail\Api\JWT\Library\UrlSafeBase64;
 use Config;
+use Zewail\Api\Setting\Set;
 use Zewail\Api\Exceptions\JWTException;
 use Zewail\Api\Exceptions\TokenExpiredException;
 use Zewail\Api\Exceptions\TokenInvalidException;
@@ -54,18 +55,9 @@ class Code
      */
     protected function init()
     {
-
-
-        // 读取默认配置文件
-        $configPath = dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'api.php';
-        $config = require($configPath);
-        // 合并配置
-        if (Config::has('api')) {
-            $_config = Config::get('api');
-            $this->config = array_merge($config, $_config);
-        } else {
+        Set::api(function($config) {
             $this->config = $config;
-        }
+        });
 
         if (isset($this->config['algorithm']) && $this->config['algorithm']) {
             $this->algorithm = $config['algorithm'];

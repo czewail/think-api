@@ -4,6 +4,7 @@ namespace Zewail\Api\Routing;
 use Config;
 use Request;
 use Closure;
+use Zewail\Api\Setting\Set;
 
 /**
  * @author   Chan Zewail <chanzewail@gmail.com>
@@ -19,18 +20,11 @@ class Router
 
 
     public function __construct()
-        {
-        // 读取默认配置文件
-        $configPath = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'api.php';
-        $config = require($configPath);
-        // 合并配置
-        $_config = Config::pull('api');
-        if ($_config && is_array($_config)) {
-            $this->config = array_merge($config, $_config);
-        } else {
+    {
+        Set::api(function($config) {
             $this->config = $config;
-        }
-        }
+        });
+    }
 
     /**
      * 创建版本
