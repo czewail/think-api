@@ -16,18 +16,16 @@ class Set
         'jwt' => 'jwt.php',
     ];
 
-    protected static $config;
-
     public static function __callStatic($func, $args)
     {
         $path = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR;
         if ($file = self::$files[$func]) {
-            self::$config = require($path . $file);
+            $config = require($path . $file);
             $_config = Config::pull($func);
             if ($_config && is_array($_config)) {
-                self::$config = array_merge(self::$config, $_config);
+                $config = array_merge($config, $_config);
             }
-            call_user_func_array($args[0], [self::$config]);
+            call_user_func_array($args[0], [$config]);
         }
     }
 }
