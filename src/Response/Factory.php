@@ -10,6 +10,7 @@ use think\exception\HttpException;
 use Config;
 use think\Model;
 use think\model\Collection as ModelCollection;
+use Zewail\Api\Response\Method\Delete as HttpDelete;
 
 
 /**
@@ -19,9 +20,21 @@ use think\model\Collection as ModelCollection;
  */
 class Factory
 {
+    // http method 详细响应
+    protected $methodMap = [
+        'delete' => HttpDelete::class,
+    ];
 
+    // 过滤器配置
     protected $resources = [];
 
+    // 需要保留的字段
+    protected $only = null;
+
+    // 需要排除的字段
+    protected $except = null;
+
+    // 构造方法
     public function __construct()
     {
         Set::resources(function($config) {
@@ -29,24 +42,67 @@ class Factory
         });
     }
 
-
     /**
-     * 过滤单个模型
+     * 过滤单个模型, 可优化，暂未优化
      * @param  [type] $item   [description]
      * @param  [type] $filter [description]
      * @return [type]         [description]
      */
     protected function filterItem($item, $filter = null)
     {
-        if (is_array($filter)) {
-            return array_intersect_key($item->toArray(), array_flip($filter));
-        } else if(is_string($filter)) {
-            if (is_array($this->resources) && !empty($this->resources[$filter]) && array_key_exists($filter, $this->resources)) {
-                return array_intersect_key($item->toArray(), array_flip($this->resources[$filter]));
+        // 模型数组
+        $item_array = $item->toArray();
+        // 过滤的交集, 默认所有
+        $result = $item_array;
+        // 存在方法内过滤参数，覆盖only与except方法
+        if ($filter) {
+            if (is_array($filter)) {
+                $result = array_intersect_key($item_array, array_flip($filter));
+            } else if(is_string($filter)) {
+                if (is_array($this->resources) && !empty($this->resources[$filter]) && array_key_exists($filter, $this->resources)) {
+                    $result = array_intersect_key($item_array, array_flip($this->resources[$filter]));
+                }
+            }
+        } else {
+            if (is_array($this->only)) {
+                $result = array_intersect_key($item_array, array_flip($this->only));
+            } else if (is_string($this->only)) {
+                if (is_array($this->resources) && !empty($this->resources[$this->only]) && array_key_exists($this->only, $this->resources)) {
+                    $result = array_intersect_key($item_array, array_flip($this->resources[$this->only]));
+                }
+            }
+            if (is_array($this->except)) {
+                $result = array_diff_key($result, array_flip($this->except));
+            } else if (is_string($this->except)) {
+                if (is_array($this->resources) && !empty($this->resources[$this->except]) && array_key_exists($this->except, $this->resources)) {
+                    $result = array_diff_key($result, array_flip($this->resources[$this->except]));
+                }
             }
         }
-        return $item;
+        return $result;
    	}
+
+    /**
+     * 调用http method 详细响应
+     * @param  [type]  $name [description]
+     * @return boolean       [description]
+     */
+    public function method($method = 'get')
+    {
+        if ($this->hasMethod($method)) {
+            return new $this->methodMap[strtolower($method)];
+        }
+    }
+
+    /**
+     * 是否存在http method
+     * @param  [type]  $name [description]
+     * @return boolean       [description]
+     */
+    public function hasMethod($method)
+    {
+        return array_key_exists(strtolower($method), $this->methodMap);
+    }
 
     /**
      * 数组的响应
@@ -54,11 +110,34 @@ class Factory
      * @param  array
      * @return Zewail\Api\Http\Response
      */
-    public function array($content = null)
+    public function array(array $content = null)
     {
         return new Response($content);
     }
 
+    /**
+     * 设置需要保留的字段
+     *
+     * @param  array
+     * @return Zewail\Api\Http\Response
+     */
+    public function only($filter = null)
+    {
+        $this->only = $filter;
+        return $this;
+    }
+
+    /**
+     * 设置需要排除的字段
+     *
+     * @param  array
+     * @return Zewail\Api\Http\Response
+     */
+    public function except($filter = null)
+    {
+        $this->except = $filter;
+        return $this;
+    }
 
     /**
      * 单个模型的响应
@@ -75,6 +154,7 @@ class Factory
         } else {
             throw new TypeErrorException("this is not a Model instance", 1);
         }
+
         return new Response($response);
     }
 
@@ -165,6 +245,20 @@ class Factory
     }
 
     /**
+     * 301 资源的URI已更改
+     *
+     * @param string $message
+     *
+     * @return think\Response
+     */
+    public function movedPermanently($message = 'Moved Permanently')
+    {
+        $Response = new Response($message);
+        $Response->setCode(301);
+        return $Response;
+    }
+
+    /**
      * 错误响应
      *
      * @param string 错误信息
@@ -180,21 +274,25 @@ class Factory
     }
 
     /**
-     * 404 错误响应
+     * 成功响应
      *
-     * @param string $message
+     * @param string 成功信息
+     * @param int    状态码
      *
      * @throws think\exception\HttpException
      *
      * @return void
      */
-    public function errorNotFound($message = 'Not Found')
+    public function success($message = null, $statusCode = 200)
     {
-        $this->error($message, 404);
+        $response = new Response($message);
+        $response->setCode($statusCode);
+        return $response;
     }
 
+  
     /**
-     * 400 错误响应
+     * 400 请求错误响应
      *
      * @param string $message
      *
@@ -207,8 +305,23 @@ class Factory
         $this->error($message, 400);
     }
 
+
     /**
-     * 403 错误响应
+     * 401 未授权响应
+     *
+     * @param string $message
+     *
+     * @throws think\exception\HttpException
+     *
+     * @return void
+     */
+    public function errorUnauthorized($message = 'Unauthorized')
+    {
+        $this->error($message, 401);
+    }
+
+    /**
+     * 403 内部错误响应
      *
      * @param string $message
      *
@@ -221,22 +334,9 @@ class Factory
         $this->error($message, 403);
     }
 
-    /**
-     * 500 错误响应
-     *
-     * @param string $message
-     *
-     * @throws think\exception\HttpException
-     *
-     * @return void
-     */
-    public function errorInternal($message = 'Internal Error')
-    {
-        $this->error($message, 500);
-    }
 
     /**
-     * 401 错误响应
+     * 404 资源不存在错误响应
      *
      * @param string $message
      *
@@ -244,10 +344,11 @@ class Factory
      *
      * @return void
      */
-    public function errorUnauthorized($message = 'Unauthorized')
+    public function errorNotFound($message = 'Not Found')
     {
-        $this->error($message, 401);
+        $this->error($message, 404);
     }
+
 
     /**
      * 405 错误响应
@@ -262,5 +363,52 @@ class Factory
     {
         $this->error($message, 405);
     }
+
+    /**
+     * 406 服务端不支持所需表示
+     *
+     * @param string $message
+     *
+     * @throws think\exception\HttpException
+     *
+     * @return void
+     */
+    public function errorNotAcceptable($message = 'Not Acceptable')
+    {
+        $this->error($message, 406);
+    }
+
+    /**
+     * 500 通用错误响应
+     *
+     * @param string $message
+     *
+     * @throws think\exception\HttpException
+     *
+     * @return void
+     */
+    public function errorInternal($message = 'Internal Error')
+    {
+        $this->error($message, 500);
+    }  
+
+    /**
+     * 503 服务当前无法处理请求错误响应
+     *
+     * @param string $message
+     *
+     * @throws think\exception\HttpException
+     *
+     * @return void
+     */
+    public function errorUnavailable($message = 'Service Unavailable Error')
+    {
+        $this->error($message, 503);
+    }
+
+    // public function __toString()
+    // {
+    //     return $this->response;
+    // }
 
 }

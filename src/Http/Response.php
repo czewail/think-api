@@ -87,6 +87,20 @@ class Response extends JsonResponse
     }
 
     /**
+     * 设置 serializer
+     * 
+     * @param  [type]
+     * @return [type]
+     */
+    public function serializer($serializer = null)
+    {
+        if ($serializer) {
+            $this->serializer = array_key_exists($serializer, $this->serializers) ? $this->serializers[$serializer] : $this->serializer;
+        }
+        return $this;
+    }
+
+    /**
      * 添加自定义数据
      * @param [type] $label [description]
      * @param string $value [description]
