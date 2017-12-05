@@ -1,5 +1,5 @@
 <?php 
-namespace Zewail\APi\Facades;
+namespace Zewail\Api\Facades;
 
 use think\Facade;
 
