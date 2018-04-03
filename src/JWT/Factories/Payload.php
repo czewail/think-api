@@ -8,7 +8,7 @@ use Zewail\Api\JWT\Factories\Claims\Issuer;
 use Zewail\Api\JWT\Factories\Claims\JwtId;
 use Zewail\Api\JWT\Factories\Claims\NotBefore;
 use Zewail\Api\JWT\Factories\Claims\Subject;
-use Request;
+use think\Container;
 use DateTime;
 use DateInterval;
 
@@ -33,7 +33,7 @@ class Payload
         if (isset($config['ttl']) && $config['ttl'] >= 0) {
             $this->setTTL($config['ttl']);
         }
-        $this->request = Request::instance();
+        $this->request = Container::get('request');
     }
 
     /**
