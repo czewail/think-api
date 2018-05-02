@@ -11,6 +11,10 @@ use Config;
 use think\Model;
 use think\model\Collection as ModelCollection;
 use Zewail\Api\Response\Method\Delete as HttpDelete;
+use Zewail\Api\Response\Method\Get as HttpGet;
+use Zewail\Api\Response\Method\Patch as HttpPatch;
+use Zewail\Api\Response\Method\Post as HttpPost;
+use Zewail\Api\Response\Method\Put as HttpPut;
 
 
 /**
@@ -23,6 +27,10 @@ class Factory
     // http method 详细响应
     protected $methodMap = [
         'delete' => HttpDelete::class,
+        'get' => HttpGet::class,
+        'patch' => HttpPatch::class,
+        'post' => HttpPost::class,
+        'put' => HttpPut::class,
     ];
 
     // 过滤器配置
