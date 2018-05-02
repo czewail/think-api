@@ -62,7 +62,7 @@ class Factory
         if ($user) {
             // 获取加密后的密码
             if (method_exists($userModel, 'jwtEncrypt')) {
-                $inputPwd = $userModel->jwtEncrypt($credentials[$pwdField]);
+                $inputPwd = $userModel->jwtEncrypt($credentials[$pwdField], $user);
             } else {
                 $inputPwd = md5($credentials[$pwdField]);
             }
