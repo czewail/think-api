@@ -5,7 +5,7 @@ namespace Zewail\Api\Exceptions;
  * @license  https://opensource.org/licenses/MIT MIT
  * @link     https://github.com/czewail/think-api
  */
-class JWTException extends \Exception
+class TokenInvalidException extends JWTException
 {
     //
 }

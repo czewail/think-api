@@ -1,9 +1,17 @@
 <?php
 namespace Zewail\Api\JWT;
 
-use Zewail\Api\JWT\UrlSafeBase64;
-use think\Config;
+use Config;
+use Request;
+use think\Model;
 use Zewail\Api\Exceptions\JWTException;
+use Zewail\Api\Exceptions\UnauthenticateException;
+use Zewail\Api\Setting\Set;
+use Zewail\Api\JWT\Factories\Code;
+use Zewail\Api\JWT\Factories\Payload as PayloadFactory;
+use Zewail\Api\JWT\Factories\Claims\Collection;
+use Zewail\Api\JWT\Factories\Claims\Subject;
+use Zewail\Api\JWT\Factories\Claims\Custom;
 
 /**
  * @author   Chan Zewail <chanzewail@gmail.com>
@@ -12,215 +20,215 @@ use Zewail\Api\Exceptions\JWTException;
  */
 class Factory
 {
-	// 配置文件信息
-	protected $config;
 
-	// 可用加密算法
-	protected $algorithms = [
-        'HS256' => ['hash', 'SHA256'],
-        'HS512' => ['hash', 'SHA512'],
-        'RS256' => ['openssl', 'SHA256'],
+    protected $PayloadFactory;
+
+    protected $defaultClaims = [
+        'iss',
+        'iat',
+        'exp',
+        'nbf',
+        'jti',
     ];
 
-    // 默认加密算法
-    protected $algorithm = 'HS256';
+    protected $claims;
 
-    // 默认hash_hmac加密私钥
-    protected $key; 
-
-    // 默认openssl加密私钥路径
-    protected $privateKeyPath;
-    // 默认openssl加密公钥路径
-    protected $publicKeyPath;
-
-    // 默认openssl加密私钥
-    protected $privateKey;
-    // 默认openssl加密公钥
-    protected $publicKey;
-
-    protected $deviation = 0;
+    protected $config = [];
 
 
-	function __construct()
-	{
-		$this->init();
-	}
+    function __construct()
+    {
+        Set::jwt(function($config) {
+            $this->config = $config;
+        });
+        $this->PayloadFactory = new PayloadFactory($this->config);
+        $this->claims = new Collection;
+    }
 
-	/**
-	 * 读取配置文件
-	 */
-	protected function init()
-	{
-		// 加载相关配置
-		if (Config::has('api')) {
-			$config = Config::get('api');
-			if (isset($config['jwt_algorithm']) && $config['jwt_algorithm']) {
-				 $this->algorithm = $config['jwt_algorithm'];
-			}
-			if (isset($config['jwt_key']) && $config['jwt_key']) {
-				$this->key = $config['jwt_key'];
-			}
+    /**
+     * 验证账号
+     * @param  array  $credentials [description]
+     * @return [type]              [description]
+     */
+    public function attempt(array $credentials, array $customClaims = [])
+    {
+        $userModel = new $this->config['user'];
 
-			if (isset($config['jwt_deviation']) && $config['jwt_deviation']) {
-				$this->deviation = $config['jwt_deviation'];
-			}
-
-			if (isset($config['jwt_privateKeyPath']) && $config['jwt_privateKeyPath'] && isset($config['jwt_publicKeyPath']) && $config['jwt_publicKeyPath']) {
-				$this->privateKeyPath = 'file://' . $config['jwt_privateKeyPath'];
-				$this->publicKeyPath = 'file://' . $config['jwt_publicKeyPath'];
-			}
-		}
-
-		if (empty($this->algorithms[$this->algorithm])) {
-			throw new JWTException('加密算法不支持');
-		}
-
-		// 检查openssl支持和配置正确性
-		if ('openssl' === $this->algorithms[$this->algorithm][0]) {
-			if (!extension_loaded('openssl')) {
-				throw new JWTException('php需要openssl扩展支持');
-			}
-			if (!file_exists($this->privateKeyPath) || !file_exists($this->publicKeyPath)) {
-				throw new JWTException('密钥或者公钥的文件路径不正确');
-			}
-			// 读取公钥和私钥
-			$this->privateKey = openssl_pkey_get_private($this->privateKeyPath);
-			$this->publicKey = openssl_pkey_get_public($this->publicKeyPath);
-		}
-	}
-
-
-	public function decode($token, $key = null, $algorithm = null)
-	{
-
-		if ($key) {
-			$this->key = $key;
-		} else {
-			if ('openssl' === $this->algorithms[$this->algorithm][0]) {
-				$this->key = $this->publicKey;
-			}
-		}
-		if ($algorithm) $this->algorithm = $algorithm;
-
-
-		$segments = explode('.', $token);
-
-		if (count($segments) != 3) {
-            throw new JWTException('Token文本错误');
+        // jwtSub属性不存在则使用email
+        $subField = $this->getModelSub($userModel);
+        $pwdField = $this->getModelPwd($userModel);
+        // 查询模型
+        $user = $userModel->where($subField, $credentials[$subField])->find();
+        if ($user) {
+            // 获取加密后的密码
+            if (method_exists($userModel, 'jwtEncrypt')) {
+                $inputPwd = $userModel->jwtEncrypt($credentials[$pwdField], $user);
+            } else {
+                $inputPwd = md5($credentials[$pwdField]);
+            }
+            // 验证密码
+            if ($inputPwd !== $user->$pwdField) {
+                throw new UnauthenticateException('账号验证失败');
+            }
+            return $this->fromSubject(new Subject($user->$subField, $customClaims));
+        } else {
+            throw new UnauthenticateException('账号不存在');
         }
+    }
 
-        list($header64, $payload64, $signature64) = $segments;
+     /**
+      * 从已认证的用户创建token
+      * @param  Model  $user [description]
+      * @return [type]       [description]
+      */
+    public function fromUser(Model $user, array $customClaims = [])
+    {
+        // jwtSub属性不存在则使用email
+        $subField = isset($user->jwtSub) ? $user->jwtSub : 'email';
+        return $this->fromSubject(new Subject($user->$subField), $customClaims);
+    }
 
-        // 获取3个片段
-        $header = json_decode(UrlSafeBase64::decode($header64), false, 512, JSON_BIGINT_AS_STRING);
-        $payload = json_decode(UrlSafeBase64::decode($payload64), false, 512, JSON_BIGINT_AS_STRING);
-        $signature = UrlSafeBase64::decode($signature64);
+    /**
+     * 将payload加密成为token
+     * @param  Payload $payload [description]
+     * @return [type]           [description]
+     */
+    public function encode(Payload $payload)
+    {
+        $code = new Code;
+        return $code->encode($payload->toArray());
+    }
+    /**
+     * 将payload加密成为token
+     * @param  Payload $payload [description]
+     * @return [type]           [description]
+     */
+    public function decode($token)
+    {
+        $code = new Code;
+        return (array) $code->decode($token);
+    }
 
-        // 验证签名
-        if (!$this->verify("$header64.$payload64", $signature)) {
-        	throw new JWTException('签名验证失败');
+    /**
+     * 创建payload对象
+     * @param  array  $customClaims [description]
+     * @return [type]               [description]
+     */
+    public function makePayload(array $customClaims = [])
+    {
+        foreach ($customClaims as $key => $custom) {
+            $paload = new Custom($key, $custom);
+            $this->claims->unshift($paload->getValue(), $paload->getName());
         }
+        return new Payload($this->claims);
+    }
 
-        // 在什么时间之前，该jwt都是不可用的
-        if (isset($payload->nbf) && $payload->nbf > (time() + $this->deviation)) {
-            throw new JWTException(
-                '无法在该时间前使用：' . date(DateTime::ISO8601, $payload->nbf)
-            );
+    /**
+     * 解析token
+     * @return [type] [description]
+     */
+    public function resolveToken()
+    {
+        $code = new Code;
+        if ($token = $this->getToken()) {
+            $payload = $code->decode($token);
+            return (array) $payload;
         }
+        return false;
+    }
 
-        // 判断jwt的签发时间
-        if (isset($payload->iat) && $payload->iat > (time() + $this->deviation)) {
-            throw new JWTException(
-                '无法在该时间前使用：' . date(DateTime::ISO8601, $payload->iat)
-            );
+    /**
+     * 验证并返回用户模型
+     * @return [type] [description]
+     */
+    public function authenticate()
+    {
+        $payload = $this->resolveToken();
+        if ($payload && isset($payload['sub'])) {
+            $userModel = new $this->config['user'];
+            // jwtSub属性不存在则使用email
+            $subField = $this->getModelSub($userModel);
+            // 查询模型
+            $user = $userModel->where($subField, $payload['sub'])->find();
+            return $user;
         }
+        return false;
+    }
 
-        // 检查是否过期
-        if (isset($payload->exp) && (time() - $this->deviation) >= $payload->exp) {
-            throw new JWTException('该 Token 已过期');
-        }
-        
-        return $payload;
-	}
-
-	/**
-	 * 加密
-	 */
-	public function encode($payload, $key = null, $algorithm = null)
-	{
-		if ($key) {
-			$this->key = $key;
-		} else {
-			if ('openssl' === $this->algorithms[$this->algorithm][0]) {
-				$this->key = $this->privateKey;
-			}
-		}
-		if ($algorithm) $this->algorithm = $algorithm;
-
-
-		$header = ['typ' => 'JWT', 'alg' => $this->algorithm];
-		$segments = [];
-		// 编码第一部分 header
-		$segments[] = UrlSafeBase64::encode(json_encode($header));
-		// 编码第二部分 payload
-		$segments[] = UrlSafeBase64::encode(json_encode($payload));
-
-		// 第三部分为header和payload signature
-		$signature_string = implode('.', $segments);
-		$signature = $this->signature($signature_string);
-		// 加密第三部分
-		$segments[] = UrlSafeBase64::encode($signature);
-
-
-		return implode('.', $segments);
-
-	}
-
-	/**
-	 * jwt 第三部分签名
-	 * @param  [type] $data      [description]
-	 * @param  [type] $key       [description]
-	 * @param  [type] $algorithm [description]
-	 * @return [type]            [description]
-	 */
-	public function signature($data)
-	{
-
-		list($func, $alg) = $this->algorithms[$this->algorithm];
-
-		switch($func) {
-			// hash_hmac 加密
-			case 'hash':
-				return hash_hmac($alg, $data, $this->key, true);
-			// openssl 加密
-			case 'openssl':
-				$sign = '';
-				$ssl = openssl_sign($data, $sign, $this->key, $alg);
-				if (!$ssl) {
-					throw new JWTException("OpenSSL无法签名数据");
-				}
-				return $sign;
-		}
-	}
-
-	public function verify($data, $signature)
-	{
-		list($func, $alg) = $this->algorithms[$this->algorithm];
-
-		switch($func) {
-			case 'hash':
-				$hash = hash_hmac($alg, $data, $this->key, true);
-				return hash_equals($signature, $hash);
-			case 'openssl':
-				$isVerify = openssl_verify($data, $signature, $this->key, $alg);
-                if (!$isVerify) {
-                    return false;
+    /**
+     * 从请求中获取token
+     * @return [type] [description]
+     */
+    public function getToken()
+    {
+        if ($Authorization = Request::header('Authorization')) {
+            $authArr = explode(' ', $Authorization);
+            if ( isset($authArr[0]) && $authArr[0] === 'Bearer') {
+                if (isset($authArr[1])) {
+                    return $authArr[1];
                 }
-                return $signature;
-		}
-		return false;
+            }
+        } else if (Request::has('token')) {
+            return Request::get('token');
+        }
+        return false;
+    }
 
-	}
+    /**
+     * 获取sub字段
+     * @return [type] [description]
+     */
+    protected function getModelSub(Model $userModel)
+    {
+        return isset($userModel->jwtSub) ? $userModel->jwtSub : 'email';
+    }
+
+    /**
+     * 获取pwd字段
+     * @return [type] [description]
+     */
+    protected function getModelPwd(Model $userModel)
+    {
+        return isset($userModel->jwtPassword) ? $userModel->jwtPassword : 'password';
+    }
+
+
+    /**
+     * 增加sub并构建Claims
+     * @param  Subject $sub [description]
+     * @return [type]       [description]
+     */
+    protected function fromSubject(Subject $sub, array $customClaims = [])
+    {
+        $this->buildDefaultClaims($customClaims);
+        $this->claims->unshift($sub->getValue(), $sub->getName());
+        return $this->encode(new Payload($this->claims));
+    }
+
+
+    /**
+     * 构建默认Claims
+     * @return [type] [description]
+     */
+    private function buildDefaultClaims(array $customClaims = [])
+    {
+        // 如果过期时间未设置则删除过期时间
+        if ($this->PayloadFactory->getTTL() === null && $key = array_search('exp', $this->defaultClaims)) {
+            unset($this->defaultClaims[$key]);
+        }
+        // 遍历默认输入
+        foreach ($this->defaultClaims as $claim) {
+            // $this->claims[$claim] = $this->PayloadFactory->make($claim);
+            $paload = $this->PayloadFactory->make($claim);
+            $this->claims->unshift($paload->getValue(), $paload->getName());
+        }
+        // 遍历自定义输出
+        foreach ($customClaims as $key => $custom) {
+            $paload = new Custom($key, $custom);
+            $this->claims->unshift($paload->getValue(), $paload->getName());
+        }
+        return $this;
+    }
 }
 
 
