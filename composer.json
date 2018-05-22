@@ -1,11 +1,11 @@
 {
-    "name": "zewail/think-api",
+    "name": "Sherlock-yang/think-api",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "陈泽韦",
-            "email": "chanzewail@gmail.com"
+            "name": "杨尚宗",
+            "email": "452025156@qq.com"
         }
     ],
     "require": {
@@ -13,7 +13,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Zewail\\Api\\": "src/"
+            "Sherlock-yang\\Api\\": "src/"
         }
     }
 }
