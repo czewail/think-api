@@ -1,5 +1,5 @@
 {
-    "name": "Sherlock-yang/think-api",
+    "name": "ysz/think-api",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -13,7 +13,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Sherlock-yang\\Api\\": "src/"
+            "ysz\\Api\\": "src/"
         }
     }
 }
