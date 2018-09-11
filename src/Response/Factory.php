@@ -280,7 +280,6 @@ class Factory extends Status
      */
     public function __call($method, array $parameters)
     {
-        dump(array_keys($this->methods));
         if ($method == 'array') {
             return new Response($parameters[0]);
         } else if (array_key_exists($method, $this->methods)) {
