@@ -1,0 +1,19 @@
+{
+    "name": "zewail/think-api",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "陈泽韦",
+            "email": "chanzewail@gmail.com"
+        }
+    ],
+    "require": {
+    	"php": ">=5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Zewail\\Api\\": "src/"
+        }
+    }
+}
