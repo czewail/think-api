@@ -81,18 +81,6 @@ class Factory extends Status
         return $result;
    	}
 
-
-    /**
-     * 数组的响应
-     *
-     * @param  array
-     * @return Zewail\Api\Http\Response
-     */
-    public function array(array $content = null)
-    {
-        return new Response($content);
-    }
-
     /**
      * 设置需要保留的字段
      *
