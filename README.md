@@ -1,6 +1,9 @@
 
-![Packagist Pre Release](https://img.shields.io/badge/packagist-v1.0.0--beta3-orange.svg)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/czewail/thinp-api/master/LICENSE)
+[![Latest Stable Version](https://poser.pugx.org/zewail/think-api/v/stable)](https://packagist.org/packages/zewail/think-api)
+[![Total Downloads](https://poser.pugx.org/zewail/think-api/downloads)](https://packagist.org/packages/zewail/think-api)
+[![Latest Unstable Version](https://poser.pugx.org/zewail/think-api/v/unstable)](https://packagist.org/packages/zewail/think-api)
+[![License](https://poser.pugx.org/zewail/think-api/license)](https://packagist.org/packages/zewail/think-api)
+
 
 thinp-api 是给开发者提供的一套针对thinkphp的API扩展工具，帮助开发者方便快捷的建造自己的API应用。
 
@@ -29,14 +32,14 @@ thinp-api 是给开发者提供的一套针对thinkphp的API扩展工具，帮�
 
 ```txt
 "require": {
-    "zewail/think-api": "1.1.*@beta"
+    "zewail/think-api": "1.1.*"
 }
 ```
 
 或者你可以在命令行执行 `composer require` 命令
 
 ```txt
-composer require zewail/think-api:1.1.x@beta
+composer require zewail/think-api:1.1.x
 ```
 
 ## 路由
@@ -501,6 +504,7 @@ $payload = JWT::decode($token);
 ## 配置
 
 该扩展包共有3个配置文件
+> 配置文件仅支持全局配置目录使用
 
 - `api.php`：管理接口配置
 - `resources.php`：过滤管理器配置
