@@ -168,7 +168,14 @@ class Factory
                     return $authArr[1];
                 }
             }
-        } else if (Request::has('token')) {
+        } else if ($Authorization = Request::server('REDIRECT_HTTP_AUTHORIZATION')) { // 兼容处理
+            $authArr = explode(' ', $Authorization);
+            if ( isset($authArr[0]) && $authArr[0] === 'Bearer') {
+                if (isset($authArr[1])) {
+                    return $authArr[1];
+                }
+            }
+        }else if (Request::has('token')) {
             return Request::get('token');
         }
         return false;
