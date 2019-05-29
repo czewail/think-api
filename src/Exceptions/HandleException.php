@@ -10,7 +10,7 @@ use Exception;
 * @license  https://opensource.org/licenses/MIT MIT
 * @link     https://github.com/czewail/think-api
 */
-class handleException extends Handle
+class HandleException extends Handle
 {
     /**
     * render
