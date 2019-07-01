@@ -70,7 +70,7 @@ class Factory
             if ($inputPwd !== $user->$pwdField) {
                 throw new UnauthenticateException('账号验证失败');
             }
-            return $this->fromSubject(new Subject($user->$subField, $customClaims));
+            return $this->fromSubject(new Subject($user->$subField), $customClaims);
         } else {
             throw new UnauthenticateException('账号不存在');
         }
