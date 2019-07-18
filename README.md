@@ -5,7 +5,7 @@
 [![License](https://poser.pugx.org/zewail/think-api/license)](https://packagist.org/packages/zewail/think-api)
 
 
-thinp-api 是给开发者提供的一套针对thinkphp的API扩展工具，帮助开发者方便快捷的建造自己的API应用。
+think-api 是给开发者提供的一套针对thinkphp的API扩展工具，帮助开发者方便快捷的建造自己的API应用。
 
 **该包是针对thinkphp5.1以上版本**
 
