@@ -70,7 +70,7 @@ class Code
             $this->deviation = $config['deviation'];
         }
 
-        if (isset($this->config['privateKeyPath']) && $this->config['privateKeyPath'] && isset($this->config['publicKeyPath']) && $cthis->onfig['publicKeyPath']) {
+        if (isset($this->config['privateKeyPath']) && $this->config['privateKeyPath'] && isset($this->config['publicKeyPath']) && $this->config['publicKeyPath']) {
             $this->privateKeyPath = 'file://' . $this->config['privateKeyPath'];
             $this->publicKeyPath = 'file://' . $this->config['publicKeyPath'];
         }
