@@ -1,7 +1,7 @@
 <?php 
 namespace Zewail\Api\Setting;
 
-use Config;
+use think\facade\Config;
 
 /**
  * @author   Chan Zewail <chanzewail@gmail.com>
@@ -21,7 +21,7 @@ class Set
         $path = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR;
         if ($file = self::$files[$func]) {
             $config = require($path . $file);
-            $_config = Config::pull($func);
+            $_config = Config::load($func);
             if ($_config && is_array($_config)) {
                 $config = array_merge($config, $_config);
             }
